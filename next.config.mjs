@@ -7,6 +7,10 @@ await import("./src/env.mjs");
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
+  transpilePackages: ["@nivo"],
+  experimental: {
+    esmExternals: 'loose'
+  },
 
   /**
    * If you have `experimental: { appDir: true }` set, then you must comment the below `i18n` config

@@ -3,8 +3,6 @@ import { BiBarChartAlt, BiHomeAlt, BiLineChart, BiLogOut, BiMenu, BiTable, BiX }
 import Link from "next/link";
 import { IconContext } from "react-icons/lib";
 
-import styles from "./navbar.module.css"
-
 function Navbar() {
     const [sidebar, setSidebar] = useState(false)
 
@@ -13,33 +11,43 @@ function Navbar() {
     return(
         <>
             <IconContext.Provider value={{color: "green"}}>
-                <div className={styles.navbar}>
-                    <Link href={"/"} className="menu_bars">
+                <div className="absolute text-6xl w-fit ml-5 mt-4">
+                    <Link href={"/"}>
                         <BiMenu onClick={showSidebar}/>
                     </Link>
                 </div>
-                <nav className={sidebar ? styles.nav_menu_active : styles.nav_menu}>
-                    <ul className={styles.nav_menu_items} onClick={showSidebar}>
-                        <li className={styles.navbar_toggle}>
-                            <Link href={"/"} className={styles.menu_bars}>
+                <nav className={`absolute w-[250px] h-[100dvh] ${sidebar ? "left-0" : "left-[-250px]"} bg-[#000030] text-neutral-300 text-2xl transition-all ease-in-out duration-300`}>
+                    <ul onClick={showSidebar}>
+                        <li className="flex flex-row items-center mt-6 mb-10">
+                            <Link href={"/"} className="ml-5 text-5xl">
                                 <BiX/>
                             </Link>
-                            <Link href={"/"} className={styles.logout}>
-                                <BiLogOut />
+                            <Link href={"/"} className="ml-auto mr-3 text-4xl flex flex-row items-center">
+                                <label className="text-2xl mr-1">Logout</label><BiLogOut />
                             </Link>
                         </li>
                         {NavbarData.map((item, index) => {
                             return (
-                                <li key={index} className={item.cName}>
-                                    {item.path !== "" ? (
-                                        <Link href={item.path}>
+                                <li key={index} className="flex flex-col ml-3">
+                                    {item.cName !== "head" ? (
+                                        <Link href={item.path} className="flex flex-row ml-3 items-center my-2 hover:bg-[#000050] px-3 py-1 rounded-lg mr-4">
                                             {item.icon}
-                                            <span className="ml-10">{item.title}</span>
+                                            <span className="ml-1">{item.title}</span>
                                         </Link>
                                     ) : (
                                         <>
-                                            {item.icon}
-                                            <span className="ml-10">{item.title}</span>
+                                            <hr className="mt-2 mr-4"/>
+                                            {item.path !== "" ? (
+                                                <Link href={item.path} className="flex flex-row items-center my-2 hover:bg-[#000050] px-3 py-1 rounded-lg mr-4">
+                                                    {item.icon}
+                                                    <span className="ml-1">{item.title}</span>
+                                                </Link>
+                                            ) : (
+                                                <div className="flex flex-row items-center my-2 px-3 py-1">
+                                                    {item.icon}
+                                                    <span className="ml-1">{item.title}</span>
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                 </li>
@@ -59,78 +67,78 @@ const NavbarData = [
         title: "Home",
         path: "/",
         icon: <BiHomeAlt/>,
-        cName: "nav_text head",
+        cName: "head",
     },
     {
         title: "Bing Data",
         path: "",
         icon: <BiBarChartAlt/>,
-        cName: "nav_text head"
+        cName: "head"
     },
     {
         title: "Charts",
         path: "/charts/bing",
         icon: <BiLineChart/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Table",
         path: "/table/bing",
         icon: <BiTable/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Google Data",
         path: "",
         icon: <BiBarChartAlt/>,
-        cName: "nav_text head"
+        cName: "head"
     },
     {
         title: "Charts",
         path: "/charts/google",
         icon: <BiLineChart/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Table",
         path: "/table/google",
         icon: <BiTable/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Lead Data",
         path: "",
         icon: <BiBarChartAlt/>,
-        cName: "nav_text head"
+        cName: "head"
     },
     {
         title: "Charts",
         path: "/charts/lead",
         icon: <BiLineChart/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Table",
         path: "/table/lead",
         icon: <BiTable/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Order Data",
         path: "",
         icon: <BiBarChartAlt/>,
-        cName: "nav_text head"
+        cName: "head"
     },
     {
         title: "Charts",
         path: "/charts/order",
         icon: <BiLineChart/>,
-        cName: "nav_text"
+        cName: "sub"
     },
     {
         title: "Table",
         path: "/table/order",
         icon: <BiTable/>,
-        cName: "nav_text"
+        cName: "sub"
     }
 ]

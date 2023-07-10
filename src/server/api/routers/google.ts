@@ -114,10 +114,14 @@ export const googleRouter = createTRPCRouter({
                 select: {
                     Term: true
                 },
-                orderBy: {
-                    Date: 'asc',
-                    Impressions: 'desc'
-                }
+                orderBy: [
+                    {
+                        Date: 'asc',
+                    },
+                    {
+                        Impressions: 'desc'
+                    }
+                ]
             })
 
             return entries.map(entry => entry.Term)
