@@ -77,13 +77,13 @@ const NavbarData = [
     },
     {
         title: "Charts",
-        path: "/charts/bing",
+        path: "/bing/charts",
         icon: <BiLineChart/>,
         cName: "sub"
     },
     {
         title: "Table",
-        path: "/table/bing",
+        path: "/bing/table",
         icon: <BiTable/>,
         cName: "sub"
     },
@@ -95,13 +95,13 @@ const NavbarData = [
     },
     {
         title: "Charts",
-        path: "/charts/google",
+        path: "/google/charts",
         icon: <BiLineChart/>,
         cName: "sub"
     },
     {
         title: "Table",
-        path: "/table/google",
+        path: "/google/table",
         icon: <BiTable/>,
         cName: "sub"
     },
@@ -113,13 +113,13 @@ const NavbarData = [
     },
     {
         title: "Charts",
-        path: "/charts/lead",
+        path: "/lead/charts",
         icon: <BiLineChart/>,
         cName: "sub"
     },
     {
         title: "Table",
-        path: "/table/lead",
+        path: "/lead/table",
         icon: <BiTable/>,
         cName: "sub"
     },
@@ -131,13 +131,13 @@ const NavbarData = [
     },
     {
         title: "Charts",
-        path: "/charts/order",
+        path: "/order/charts",
         icon: <BiLineChart/>,
         cName: "sub"
     },
     {
         title: "Table",
-        path: "/table/order",
+        path: "/order/table",
         icon: <BiTable/>,
         cName: "sub"
     }

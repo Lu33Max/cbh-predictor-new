@@ -65,7 +65,7 @@ export const bingRouter = createTRPCRouter({
             let currentDate = ''
             let impressions = 0
 
-            entries.map((entry) => {
+            entries.map((entry, i) => {
                 if(entry.Date === currentDate){
                     impressions += entry.Impressions
                 } else {
@@ -74,6 +74,10 @@ export const bingRouter = createTRPCRouter({
                     }
                     currentDate = entry.Date
                     impressions = entry.Impressions
+                }
+
+                if(i === entries.length -1){
+                    monthlyImpressions.push({date: currentDate, value: impressions})
                 }
             })
 
@@ -92,7 +96,7 @@ export const bingRouter = createTRPCRouter({
             let currentDate = ''
             let clicks = 0
 
-            entries.map((entry) => {
+            entries.map((entry, i) => {
                 if(entry.Date === currentDate){
                     clicks += entry.Clicks
                 } else {
@@ -101,6 +105,10 @@ export const bingRouter = createTRPCRouter({
                     }
                     currentDate = entry.Date
                     clicks = entry.Clicks
+                }
+
+                if(i === entries.length -1){
+                    monthlyClicks.push({date: currentDate, value: clicks})
                 }
             })
 

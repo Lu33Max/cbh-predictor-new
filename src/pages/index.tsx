@@ -9,9 +9,8 @@ import { FunnelChart } from "~/components/charts/funnel";
 import { CalendarChart } from "~/components/charts/calendar";
 import { SwarmPlot } from "~/components/charts/swarmplot";
 
-import { type ISwarmPlotDatum } from "~/common/types";
+import { type IDateValue, type ISwarmPlotDatum } from "~/common/types";
 import { type FunnelDatum } from "@nivo/funnel";
-import { type CalendarDatum } from "@nivo/calendar";
 
 export default function Header() {
     return(
@@ -35,20 +34,26 @@ function Home() {
     
     const { data: swarmPrice } = api.order.priceDist.useQuery()
     const { data: swarmOrderPrice } = api.order.orderPriceDist.useQuery()
-    
+    const { data: calendarData } = api.order.dateCount.useQuery()
+
+    const { data: resultBingImpr } = api.bing.monthlyImpressions.useQuery()
+    const { data: resultBingClicks } = api.bing.monthlyClicks.useQuery()
+    const { data: resultGoogleImpr } = api.google.monthlyImpressions.useQuery()
+    const { data: resultGoogleClicks } = api.google.monthlyClicks.useQuery()
+    const { data: resultOrders } = api.order.monthCount.useQuery()
+
     const [allCount, setAllCount] = useState(0);
     
-    const [calendarData, setCalendarData] = useState<CalendarDatum[]>([{day: "2022-10-05", value: 5}]);
-    const [swarmData, setSwarmData] = useState<ISwarmPlotDatum[]>([{id: "Teset", value: 100, volume:5, group: "order"}]);
-    const [funnelData, setFunnelData] = useState<FunnelDatum[]>([{id: "Teset", label: "fas", value: 10}, {id: "tsf", label: "fsfa", value: 5}, {id: "tsdf", label: "fsfa", value: 5}]);
-    const [dates, setDates] = useState([]);
+    const [swarmData, setSwarmData] = useState<ISwarmPlotDatum[]>([]);
+    const [funnelData, setFunnelData] = useState<FunnelDatum[][]>([]);
+    const [dates, setDates] = useState<string[]>([]);
     const [activeDate, setActiveDate] = useState(0);
     
     const [cycle, setCycle] = useState(false);
     
     const { data: bingTop } = api.bing.topTerms.useQuery()
     const { data: googleTop } = api.google.topTerms.useQuery()
-
+    
     let dateIndex = 0;
 
     useEffect(() => {
@@ -60,25 +65,6 @@ function Home() {
             setSwarmData([...swarmPrice.filter(e => e !== undefined) as ISwarmPlotDatum[], ...swarmOrderPrice.filter(e => e !== undefined) as ISwarmPlotDatum[]])
         }
     }, [swarmPrice, swarmOrderPrice])
-
-    const showMonths = () => {
-        return (
-            <>
-                {dates.map((date, index) => (
-                    <label
-                        key={index}
-                        className={
-                            index === activeDate
-                                ? "styles.l_header_active"
-                                : "styles.l_header_label"
-                        }
-                    >
-                        {date}
-                    </label>
-                ))}
-            </>
-        );
-    };
 
     useEffect(() => {
         if (cycle) {
@@ -97,38 +83,36 @@ function Home() {
         }
     }, [funnelData]);
 
-/*
-        //// Calendar /////
-        const urlCalendar = `${Constants.API_URL_ORDER_ENTRIES}/date-count`;
-        const resultCalendar = await axiosApiInstance.get(urlCalendar);
-        if (resultCalendar.status === 200) {
-            setCalendarData(resultCalendar.data);
-        }
+    const showMonths = () => {
+        return (
+            <>
+                {dates.map((date, index) => (
+                    <label
+                        key={index}
+                        className={
+                            index === activeDate
+                                ? "text-2xl py-1 px-3 rounded-full whitespace-nowrap mx-1 text-center bg-[#6BB238] border-[#a4d67f] border-8"
+                                : "text-2xl py-1 px-3 rounded-full whitespace-nowrap mx-1 text-center bg-[#d4d4d4]"
+                        }
+                    >
+                        {date}
+                    </label>
+                ))}
+            </>
+        );
+    };
 
 
-    async function getFunnelData() {
-        const urlBingImpr = `${Constants.API_URL_BING_ENTRIES}/impressions`;
-        const resultBingImpr = await axiosApiInstance.get(urlBingImpr);
-        const urlBingClicks = `${Constants.API_URL_BING_ENTRIES}/clicks`;
-        const resultBingClicks = await axiosApiInstance.get(urlBingClicks);
-
-        const urlGoogleImpr = `${Constants.API_URL_GOOGLE_ENTRIES}/impressions`;
-        const resultGoogleImpr = await axiosApiInstance.get(urlGoogleImpr);
-        const urlGoogleClicks = `${Constants.API_URL_GOOGLE_ENTRIES}/clicks`;
-        const resultGoogleClicks = await axiosApiInstance.get(urlGoogleClicks);
-
-        const urlOrders = `${Constants.API_URL_ORDER_ENTRIES}/month-count`;
-        const resultOrders = await axiosApiInstance.get(urlOrders);
-
+    useEffect(() => {
         if (
-            resultBingClicks.status === 200 &&
-            resultBingImpr.status === 200 &&
-            resultGoogleClicks.status === 200 &&
-            resultGoogleImpr.status === 200 &&
-            resultOrders.status === 200
+            resultBingClicks !== undefined &&
+            resultBingImpr !== undefined &&
+            resultGoogleClicks !== undefined &&
+            resultGoogleImpr !== undefined &&
+            resultOrders !== undefined
         ) {
-            var newFunnel = [];
-            var newDates = [];
+            const newFunnel: FunnelDatum[][] = [];
+            const newDates: string[] = [];
 
             let bi = 0,
                 bc = 0,
@@ -137,52 +121,42 @@ function Home() {
                 o = 0;
 
             for (let i = 0; i < 6; i++) {
-                if (
-                    bi < resultBingImpr.data.length &&
-                    bc < resultBingClicks.data.length &&
-                    gi < resultGoogleImpr.data.length &&
-                    gc < resultGoogleClicks.data.length &&
-                    o < resultOrders.data.length
-                ) {
-                    if (
-                        resultBingImpr.data[bi].month === resultBingClicks.data[bc].month
-                    ) {
-                        if (
-                            resultGoogleImpr.data[gi].month ===
-                            resultGoogleClicks.data[gc].month
-                        ) {
-                            if (
-                                resultBingImpr.data[bi].month ===
-                                resultGoogleImpr.data[gi].month
-                            ) {
-                                if (
-                                    resultBingImpr.data[bi].month === resultOrders.data[o].month
-                                ) {
-                                    newDates.push(resultBingImpr.data[i].month);
+                const bingImpr = resultBingImpr[bi]
+                const bingClicks = resultBingClicks[bc]
+                const googleImpr = resultGoogleImpr[gi]
+                const googleClicks = resultGoogleClicks[gc]
+                const currentOrder = resultOrders[o]
+
+                if (bi < resultBingImpr.length && bc < resultBingClicks.length && gi < resultGoogleImpr.length && gc < resultGoogleClicks.length && o < resultOrders.length && bingImpr !== undefined && bingClicks !== undefined && googleImpr !== undefined && googleClicks !== undefined && currentOrder !== undefined) {
+                    if (bingImpr?.date === bingClicks?.date) {
+                        if (googleImpr?.date === googleClicks?.date) {
+                            if (bingImpr?.date === googleImpr?.date) {
+                                if (bingImpr?.date === currentOrder?.date) {
+                                    newDates.push(resultBingImpr[i]?.date ?? "");
                                     newFunnel.push([
                                         {
                                             id: "impressions",
                                             value:
-                                                (resultBingImpr.data[bi].value +
-                                                    resultGoogleImpr.data[gi].value) /
+                                                (bingImpr.value +
+                                                    googleImpr.value) /
                                                 10,
                                             label:
-                                                resultBingImpr.data[bi].value +
-                                                resultGoogleImpr.data[gi].value,
+                                                (bingImpr.value +
+                                                googleImpr.value).toString(),
                                         },
                                         {
                                             id: "clicks",
                                             value:
-                                                resultBingClicks.data[bc].value +
-                                                resultGoogleClicks.data[gc].value,
+                                                bingClicks.value +
+                                                googleClicks.value,
                                             label:
-                                                resultBingClicks.data[bc].value +
-                                                resultGoogleClicks.data[gc].value,
+                                                (bingClicks.value +
+                                                googleClicks.value).toString(),
                                         },
                                         {
                                             id: "orders",
-                                            value: resultOrders.data[o].value * 5,
-                                            label: resultOrders.data[i + 1].value,
+                                            value: currentOrder.value * 5,
+                                            label: resultOrders[i + 1]?.value.toString(),
                                         },
                                     ]);
                                     bi++;
@@ -192,32 +166,33 @@ function Home() {
                                     o++;
                                 } else {
                                     if (
-                                        resultBingImpr.data[bi].month < resultOrders.data[o].month
+                                        bingImpr?.date < currentOrder?.date
                                     ) {
+                                        
                                         while (
-                                            resultBingImpr.data[bi].month < resultOrders.data[o].month
+                                            bingImpr?.date < (resultOrders[o] as IDateValue).date
                                         ) {
                                             o++;
-                                            if (!(o < resultOrders.data.length)) {
+                                            if (!(o < resultOrders.length)) {
                                                 break;
                                             }
                                         }
                                     }
                                     if (
-                                        resultBingImpr.data[bi].month > resultOrders.data[o].month
+                                        bingImpr?.date > currentOrder?.date
                                     ) {
                                         while (
-                                            resultBingImpr.data[bi].month > resultOrders.data[o].month
+                                            (resultBingImpr[bi] as IDateValue).date > currentOrder?.date
                                         ) {
                                             bi++;
                                             bc++;
                                             gi++;
                                             gc++;
                                             if (
-                                                !(bi < resultBingImpr.data.length) ||
-                                                !(bc < resultBingClicks.data.length) ||
-                                                !(gi < resultGoogleImpr.data.length) ||
-                                                !(gc < resultGoogleClicks.data.length)
+                                                !(bi < resultBingImpr.length) ||
+                                                !(bc < resultBingClicks.length) ||
+                                                !(gi < resultBingImpr.length) ||
+                                                !(gc < resultGoogleClicks.length)
                                             ) {
                                                 break;
                                             }
@@ -227,36 +202,32 @@ function Home() {
                                 }
                             } else {
                                 if (
-                                    resultBingImpr.data[bi].month <
-                                    resultGoogleImpr.data[gi].month
+                                    bingImpr?.date < googleImpr?.date
                                 ) {
                                     while (
-                                        resultBingImpr.data[bi].month <
-                                        resultGoogleImpr.data[gi].month
+                                        bingImpr?.date < (resultGoogleImpr[gi] as IDateValue).date
                                     ) {
                                         gi++;
                                         gc++;
                                         if (
-                                            !(gi < resultGoogleImpr.data.length) ||
-                                            !(gc < resultGoogleClicks.data.length)
+                                            !(gi < resultGoogleImpr.length) ||
+                                            !(gc < resultGoogleClicks.length)
                                         ) {
                                             break;
                                         }
                                     }
                                 }
                                 if (
-                                    resultBingImpr.data[bi].month >
-                                    resultGoogleImpr.data[gi].month
+                                    bingImpr?.date > googleImpr?.date
                                 ) {
                                     while (
-                                        resultBingImpr.data[bi].month >
-                                        resultGoogleImpr.data[gi].month
+                                        (resultBingImpr[bi] as IDateValue).date > googleImpr?.date
                                     ) {
                                         bi++;
                                         bc++;
                                         if (
-                                            !(bi < resultBingImpr.data.length) ||
-                                            !(bc < resultBingClicks.data.length)
+                                            !(bi < resultBingImpr.length) ||
+                                            !(bc < resultBingClicks.length)
                                         ) {
                                             break;
                                         }
@@ -266,29 +237,25 @@ function Home() {
                             }
                         } else {
                             if (
-                                resultGoogleImpr.data[gi].month <
-                                resultGoogleClicks.data[gc].month
+                                googleImpr?.date < googleClicks?.date
                             ) {
                                 while (
-                                    resultGoogleImpr.data[gi].month <
-                                    resultGoogleClicks.data[gc].month
+                                    googleImpr?.date < (resultGoogleClicks[gc] as IDateValue).date
                                 ) {
                                     gc++;
-                                    if (!(gc < resultGoogleClicks.data.length)) {
+                                    if (!(gc < resultGoogleClicks.length)) {
                                         break;
                                     }
                                 }
                             }
                             if (
-                                resultGoogleImpr.data[gi].month >
-                                resultGoogleClicks.data[gc].month
+                                googleImpr?.date > googleClicks?.date
                             ) {
                                 while (
-                                    resultGoogleImpr.data[gi].month >
-                                    resultGoogleClicks.data[gc].month
+                                    (resultBingImpr[gi] as IDateValue).date > googleClicks?.date
                                 ) {
                                     gi++;
-                                    if (!(gi < resultGoogleImpr.data.length)) {
+                                    if (!(gi < resultGoogleImpr.length)) {
                                         break;
                                     }
                                 }
@@ -297,25 +264,25 @@ function Home() {
                         }
                     } else {
                         if (
-                            resultBingImpr.data[bi].month < resultBingClicks.data[bc].month
+                            bingImpr.date < bingClicks?.date
                         ) {
                             while (
-                                resultBingImpr.data[bi].month < resultBingClicks.data[bc].month
+                                bingImpr.date < (resultBingClicks[bc] as IDateValue).date
                             ) {
                                 bc++;
-                                if (!(bc < resultBingClicks.data.length)) {
+                                if (!(bc < resultBingClicks.length)) {
                                     break;
                                 }
                             }
                         }
                         if (
-                            resultBingImpr.data[bi].month > resultBingClicks.data[bc].month
+                            bingImpr.date > bingClicks.date
                         ) {
                             while (
-                                resultBingImpr.data[bi].month > resultBingClicks.data[bc].month
+                                (resultBingImpr[bi] as IDateValue).date > bingClicks.date
                             ) {
                                 bi++;
-                                if (!(bi < resultBingImpr.data.length)) {
+                                if (!(bi < resultBingImpr.length)) {
                                     break;
                                 }
                             }
@@ -336,7 +303,7 @@ function Home() {
                 setCycle(true);
             }
         }
-    }*/
+    }, [resultBingClicks, resultBingImpr, resultGoogleClicks, resultGoogleImpr, resultOrders])
 
     return (
         <>
@@ -380,7 +347,7 @@ function Home() {
                                     </div>
                                 </div>
                                 <div className={styles.l_funnel_container}>
-                                    {FunnelChart(funnelData)}
+                                    {FunnelChart(funnelData[activeDate] ?? [{id: "None", value: 0}])}
                                 </div>
                                 <div className={styles.l_right_text_top}>Impressions</div>
                                 <div className={styles.l_right_text_mid}>Clicks</div>
@@ -392,7 +359,7 @@ function Home() {
                         <div className={styles.right_top_container_bg}>
                             <div className={styles.rt_grid}>
                                 <div className={styles.rt_left_container}>
-                                    {CalendarChart(calendarData)}
+                                    {CalendarChart(calendarData ?? [])}
                                 </div>
                                 <div className={styles.rt_right_container}>
                                     {SwarmPlot(swarmData)}
