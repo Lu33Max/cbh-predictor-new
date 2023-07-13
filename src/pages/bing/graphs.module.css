@@ -254,7 +254,7 @@
     height: 50px;
     border-bottom-left-radius: 0;
     border-top-left-radius: 0;
-    background-color: rgb(107, 178, 56);
+    background-color: #6bb238;
     transform: rotate(-90deg) translate(-25%, -50%);
   }
   .button_export:hover {
@@ -265,7 +265,7 @@
     width: 50px;
     border-top-left-radius: 0;
     border-top-right-radius: 0;
-    background-color: rgb(89, 146, 49);
+    background-color: #599231;
     transform: translate(0, 100%);
   }
   .button_showexport:hover {

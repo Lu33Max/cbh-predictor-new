@@ -14,13 +14,15 @@ import { type FunnelDatum } from "@nivo/funnel";
 
 export default function Header() {
     return(
-        <main className="h-[100vh] w-[100vw]">
-            <div className={styles.body2}>
+        <main className="h-[100vh] w-[100vw] font-poppins">
+            <div className="h-[100vh] overflow-x-hidden pt-[10vh]">
                 <Home/>
             </div>
-            <div className={styles.header2}>
-                <div className={styles.text_container2}>CBH Predictor Tool</div>
-                {<Navbar/>}
+            <div className="fixed top-0 h-[10vh] w-full bg-[#000020] shadow-[0_3px_20px_rgb(2,4,2)] ">
+                <div className="fixed w-full pt-4 text-center align-middle text-6xl text-white ">
+                    CBH Predictor Tool
+                </div>
+                <Navbar/>
             </div>
         </main>
     )
@@ -372,9 +374,11 @@ function Home() {
                             <div className={styles.rb_grid}>
                                 <div className={styles.rb_line}></div>
                                 <div className={styles.rb_top_left}>
-                                    Top Searches Last Month
+                                    <b>Top Searches Last Month</b>
                                 </div>
-                                <div className={styles.rb_top_right}>Top Orders Last Month</div>
+                                <div className={styles.rb_top_right}>
+                                    <b>Top Orders Last Month</b>
+                                </div>
                                 <div className={styles.rb_bot_left}>
                                     <div
                                         style={{

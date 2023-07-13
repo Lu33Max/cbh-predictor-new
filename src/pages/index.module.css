@@ -359,35 +359,3 @@
     font-family: 'poppins';
     overflow-x: hidden;
   }
-  
-  .header2 {
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 10vh;
-    width: 100%;
-    background-color: #000020;
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    box-shadow: 0 3px 20px rgb(2, 4, 2);
-  }
-  
-  .menu_container {
-    position: absolute;
-    top: 45%;
-    left: 3%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 50px;
-  }
-  
-  .text_container2 {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    margin-right: -50%;
-    transform: translate(-50%, -50%);
-    color: white;
-    font-size: 50px;
-    font-weight: 400;
-  }

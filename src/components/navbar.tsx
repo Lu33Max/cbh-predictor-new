@@ -12,16 +12,16 @@ function Navbar() {
         <>
             <IconContext.Provider value={{color: "green"}}>
                 <div className="absolute text-6xl w-fit ml-5 mt-4">
-                    <Link href={"/"}>
+                    <button>
                         <BiMenu onClick={showSidebar}/>
-                    </Link>
+                    </button>
                 </div>
                 <nav className={`absolute w-[250px] h-[100dvh] ${sidebar ? "left-0" : "left-[-250px]"} bg-[#000030] text-neutral-300 text-2xl transition-all ease-in-out duration-300`}>
                     <ul onClick={showSidebar}>
                         <li className="flex flex-row items-center mt-6 mb-10">
-                            <Link href={"/"} className="ml-5 text-5xl">
+                            <button className="ml-5 text-5xl">
                                 <BiX/>
-                            </Link>
+                            </button>
                             <Link href={"/"} className="ml-auto mr-3 text-4xl flex flex-row items-center">
                                 <label className="text-2xl mr-1">Logout</label><BiLogOut />
                             </Link>
