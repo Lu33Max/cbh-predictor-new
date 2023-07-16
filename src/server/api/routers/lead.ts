@@ -65,6 +65,6 @@ export const leadRouter = createTRPCRouter({
                 }
             })
 
-            return entries.map(entry => entry.Lead_Date.toISOString().slice(7))
+            return Array.from(new Set(entries.map(entry => entry.Lead_Date.toISOString().slice(0, 7))))
         })
 });

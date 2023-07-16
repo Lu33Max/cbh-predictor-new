@@ -9,7 +9,7 @@ import styles from "./graphs.module.css";
 import { api } from "~/utils/api";
 import { useRouter } from "next/router";
 
-import { type Bing } from "@prisma/client";
+import { type Google } from "@prisma/client";
 import {
   type IBumpDatum,
   type ILineDatum,
@@ -52,7 +52,7 @@ const tempScheme = ["#5fc431", "#96e890", "#82cc96", "#62b37f", "#188255"];
 
 //// MAPPING FUNCTIONS ////
 function GetImpressions(
-  entries: Bing[],
+  entries: Google[],
   minImpr: number,
   showOthers: boolean,
   dates: string[],
@@ -111,7 +111,7 @@ function GetImpressions(
 }
 
 function GetClicks(
-  entries: Bing[],
+  entries: Google[],
   minClicks: number,
   showOthers: boolean,
   dates: string[],
@@ -169,7 +169,7 @@ function GetClicks(
   return data;
 }
 
-function GetClickThrough(entries: Bing[], dates: string[], period: number) {
+function GetClickThrough(entries: Google[], dates: string[], period: number) {
   const [clicks, setClicks] = useState(0);
   const [impressions, setImpressions] = useState(0);
   let interval = period;
@@ -196,7 +196,7 @@ function GetClickThrough(entries: Bing[], dates: string[], period: number) {
 function GetClicksAndImpressionsOverTime(
   dates: string[],
   period: number,
-  allEntries: Bing[]
+  allEntries: Google[]
 ) {
   const [data, setData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -277,7 +277,7 @@ function GetClicksAndImpressionsOverTime(
 function GetClickThroughOverTime(
   dates: string[],
   period: number,
-  allEntries: Bing[]
+  allEntries: Google[]
 ) {
   const [data, setData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -350,7 +350,7 @@ function GetCustomAreaBump(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Bing[]
+  allEntries: Google[]
 ) {
   const [data, setData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -422,7 +422,7 @@ function GetCustomBar(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Bing[]
+  allEntries: Google[]
 ): BarDatum[] {
   const [barData, setBarData] = useState<BarDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -481,7 +481,7 @@ function GetCustomLine(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Bing[]
+  allEntries: Google[]
 ) {
   const [lineData, setLineData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -540,26 +540,26 @@ function GetCustomLine(
 }
 
 //// RENDER VIEW ////
-const BingChart = () => {
+const GoogleChart = () => {
   const router = useRouter();
 
   const initialExport = [false, false, false, false, false, false, false];
   const [showExport, setShowExport] = useState(false);
+  const [includeExport, setIncludeExport] = useState(initialExport);
 
-  const [minImpr, setMinImpr] = useState(10);
+  const [minImpr, setMinImpr] = useState(100);
   const [minClicks, setMinClicks] = useState(5);
   const [periods, setPeriods] = useState([0, 2, 2]);
   const [showOthers, setShowOthers] = useState(true);
 
-  const { data: allEntries } = api.bing.getAll.useQuery();
-  const { data: dates } = api.bing.dates.useQuery();
+  const { data: allEntries } = api.google.getAll.useQuery();
+  const { data: dates } = api.google.dates.useQuery();
 
   const [terms, setTerms] = useState([
     "biobank",
     "biorepository",
     "ffpe tissue",
   ]);
-  const [includeExport, setIncludeExport] = useState(initialExport);
 
   const headers = [
     "Impressions",
@@ -737,7 +737,7 @@ const BingChart = () => {
         </div>
         {/* First Block */}
         <div className={styles.grid_container_3_items_small_mid}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
+          <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
             Period:
             <select onChange={(e) => onPeriodChange(e, 0)} className="mr-2">
               <option selected={true} value={0}>
@@ -847,7 +847,7 @@ const BingChart = () => {
         </div>
         {/* Second Block */}
         <div className={styles.grid_container_2_items}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
+          <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
             Period:
             <select onChange={(e) => onPeriodChange(e, 1)}>
               <option value={2} selected={true}>
@@ -925,7 +925,7 @@ const BingChart = () => {
         </div>
         {/* Third Block */}
         <div className={styles.grid_container_2_items_4_rows}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
+          <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
             Period:
             <select onChange={(e) => onPeriodChange(e, 2)}>
               <option value={2} selected={true}>
@@ -1072,4 +1072,4 @@ const BingChart = () => {
   }
 };
 
-export default BingChart;
+export default GoogleChart;
