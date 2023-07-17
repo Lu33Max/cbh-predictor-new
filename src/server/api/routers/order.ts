@@ -75,7 +75,7 @@ export const orderRouter = createTRPCRouter({
                     Order_Date: 'desc'
                 }
             })
-            return entries.map(entry => entry.Order_Date.toISOString().slice(0, 7))
+            return Array.from(new Set(entries.map(entry => entry.Order_Date.toISOString().slice(0, 7))))
         }),
 
     priceDist: publicProcedure

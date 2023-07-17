@@ -12,7 +12,9 @@ import { useRouter } from "next/router";
 import { api } from "~/utils/api";
 import { truncateTimeMonth } from "~/common/helpers";
 import { type Lead } from "@prisma/client";
-import { type IPieDatum } from "~/common/types";
+import { type ILineDatum, type IPieDatum } from "~/common/types";
+import Navbar from "~/components/navbar";
+import Head from "next/head";
 
 const primaryScheme = [
   "#5fc431",
@@ -115,7 +117,12 @@ function GetMedicalField(
   return data;
 }
 
-function GetLeadStatus(entries: Lead[], showOthers: boolean, dates: string[], period: number) {
+function GetLeadStatus(
+  entries: Lead[],
+  showOthers: boolean,
+  dates: string[],
+  period: number
+) {
   const [data, setData] = useState<IPieDatum[]>([]);
   let interval = period;
 
@@ -123,7 +130,7 @@ function GetLeadStatus(entries: Lead[], showOthers: boolean, dates: string[], pe
     interval = dates.length - 1;
   }
 
-useEffect(() => {
+  useEffect(() => {
     const newData: IPieDatum[] = [];
     let others = 0;
     const currentDate = dates[interval];
@@ -136,9 +143,7 @@ useEffect(() => {
             truncateTimeMonth(entry.Lead_Date.toISOString()) >= currentDate))
       ) {
         if (newData.find((e) => e.id === entry.Lead_Status)) {
-          const index = newData.findIndex(
-            (e) => e.id === entry.Lead_Status
-          );
+          const index = newData.findIndex((e) => e.id === entry.Lead_Status);
           if (newData[index]) (newData[index] as IPieDatum).value++;
         } else {
           newData.push({
@@ -150,21 +155,14 @@ useEffect(() => {
       }
     });
 
-    const values = newData.reduce((prev, curr) => 
-      prev + curr.value
-    , others)
-
-    console.log(newData)
+    const values = newData.reduce((prev, curr) => prev + curr.value, others);
 
     newData.map((entry, i) => {
-      if(entry.id.toLowerCase() === "other"){
-        others += entry.value
-        newData.splice(i, 1)
+      if (entry.id.toLowerCase() === "other") {
+        others += entry.value;
+        newData.splice(i, 1);
       }
-      else {
-        newData[i].value = Math.floor((entry.value / values) * 100)
-      }
-    })
+    });
 
     newData.sort((a, b) => b.value - a.value);
 
@@ -175,62 +173,85 @@ useEffect(() => {
         value: others,
       });
     }
-    setData(newData);
+
+    const percentual: IPieDatum[] = newData.map((e) => {
+      return {
+        id: e.id,
+        label: e.label,
+        value: Math.round((e.value / values) * 100),
+      };
+    });
+
+    setData(percentual);
   }, [entries, showOthers, dates, interval]);
 
-    return data
+  return data;
 }
 
-/*function GetLeadsOverTime(dates, period) {
-    const [data, setData] = useState([])
-    const [entries, setEntries] = useState([])
-    let interval = period
+function GetLeadsOverTime(allEntries: Lead[], dates: string[], period: number) {
+  const [data, setData] = useState<ILineDatum[]>([]);
+  const [entries, setEntries] = useState(allEntries);
+  let interval = period;
 
-    if(interval >= dates.length){
-        interval = dates.length -1
+  if (interval >= dates.length) {
+    interval = dates.length - 1;
+  }
+
+  useEffect(() => {
+    const currentDate = dates[interval];
+    if (currentDate !== undefined) {
+      setEntries(
+        allEntries
+          .filter(
+            (e) =>
+              truncateTimeMonth(e.Lead_Date.toISOString()).localeCompare(
+                currentDate
+              ) >= 0
+          )
+          .sort((a, b) => (a.Lead_Date < b.Lead_Date ? 1 : -1))
+      );
     }
+  }, [dates, allEntries, interval]);
 
-    useEffect(() => {
-        if(dates.length > 0){
-            var filter
+  useEffect(() => {
+    const newData: ILineDatum[] = [{ id: "Click-Through", data: [] }];
+    const countArr: number[] = [];
 
-            if(period > dates.length) filter = []
-            else filter = [[`leadDate >= '${dates[interval]}-01'`, null]]
+    if (entries.length > 0 && newData[0]) {
+      let count = 0;
+      let currentMonth = truncateTimeMonth(
+        entries[0]?.Lead_Date.toISOString() ?? ""
+      );
 
-            let sort = "ORDER BY leadDate DESC"
-
-            const url = `${Constants.API_URL_LEAD_ENTRIES}/filter/true/${sort}/null`
-            getData(url, filter, setEntries)
+      entries.map((entry, i) => {
+        if (truncateTimeMonth(entry.Lead_Date.toISOString()) === currentMonth) {
+          count++;
+        } else {
+          countArr.push(count);
+          count = 1;
+          currentMonth = truncateTimeMonth(entry.Lead_Date.toISOString());
         }
-    },[dates, period])
 
-    useEffect(() => {
-        let newData = [{
-            id: "dates",
-            color: "hsl(48, 70%, 50%)",
-            data: []
-        }]
-
-        if(entries.length > 0){
-            entries.map(function(entry){
-                if(entry.leadDate){
-                    if(newData[0].data.find(e => e.x === truncateTimeMonth(entry.leadDate))) {
-                        newData[0].data[newData[0].data.findIndex((e => e.x === truncateTimeMonth(entry.leadDate)))].y++
-                    } else {
-                        newData[0].data.push({
-                            x: truncateTimeMonth(entry.leadDate),
-                            y: 1
-                        })
-                    }
-                }
-            })
-            newData[0].data.reverse()
+        // Pushes the last entry that else would not be detected, because the date doesn't change at the end of the array
+        if (i === entries.length - 1) {
+          countArr.push(count);
         }
-        setData(newData)
-    }, [entries])
+      });
 
-    return data
-}*/
+      for (let i = 0; i < countArr.length; i++) {
+        newData[0].data.push({
+          x: dates[i] ?? "None",
+          y: countArr[i] ?? 0,
+        });
+      }
+      newData[0].data.reverse();
+    }
+    setData(newData);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entries]);
+
+  return data;
+}
 
 //// RENDER VIEW ////
 const LeadChart = () => {
@@ -303,8 +324,8 @@ const LeadChart = () => {
     for (let i = 0; i < includeExport.length; i++) {
       if (includeExport[i] === true) {
         count++;
-
         const element = printRef.current[i];
+
         if (element !== undefined && element !== null) {
           const canvas = await html2canvas(element, { scale: 3 });
           const data = canvas.toDataURL("image/png");
@@ -393,131 +414,164 @@ const LeadChart = () => {
   };
 
   return (
-    <div className={styles.body}>
-      <button
-        onClick={() => void router.push("/")}
-        className={styles.button_backarrow}
-      >
-        &#60;
-      </button>
-      <div className={styles.export}>
-        <button
-          onClick={() => {
-            setShowExport(false);
-            void handleDownloadPdf();
-          }}
-          className={styles.button_export}
-        >
-          Export
-        </button>
-        <button
-          onClick={() => setShowExport(!showExport)}
-          className={styles.button_showexport}
-        >
-          <BiShow />
-        </button>
-      </div>
-      <div className={styles.grid_container_2_items_3_rows}>
-        <div className={styles.settings}>
-          Period:
-          <select onChange={(e) => onPeriodChange(e, 0)}>
-            <option value={2} selected={true}>
-              Last 3 Months
-            </option>
-            <option value={5}>Last 6 Months</option>
-            <option value={11}>Last Year</option>
-          </select>
-          Show Others
-          <input
-            type="checkbox"
-            defaultChecked
-            onChange={() => setShowOthers(!showOthers)}
-          ></input>
-        </div>
-        <div className={styles.left_wrapper}>
-          <h3>
-            Customer Fields
-            {showExport ? (
+    <>
+      <Head>
+        <title>CBH Predictor Tool</title>
+        <meta name="description" content="Generated by create-t3-app" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="h-[100vh] w-[100vw] font-poppins">
+        <div className="overflow-y-auto overflow-x-hidden px-20 pt-[12vh]">
+          <button
+            onClick={() => void router.push("/")}
+            className="fixed left-4 w-12 rounded-2xl bg-[#000040] py-1 text-white"
+          >
+            <b>&#60;</b>
+          </button>
+          <div className="fixed left-4 top-48">
+            <button
+              onClick={() => {
+                setShowExport(false);
+                void handleDownloadPdf();
+              }}
+              className="fixed -left-[0.55rem] h-[50px] w-[100px] -rotate-90 rounded-r-2xl bg-[#6bb238]"
+            >
+              Export
+            </button>
+            <button
+              onClick={() => setShowExport(!showExport)}
+              className="relative top-16 flex w-[50px] justify-center rounded-b-2xl bg-[#599231] py-2"
+            >
+              <BiShow />
+            </button>
+          </div>
+          <div className={styles.grid_container_2_items_3_rows}>
+            <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
+              Period:
+              <select onChange={(e) => onPeriodChange(e, 0)}>
+                <option value={2} selected={true}>
+                  Last 3 Months
+                </option>
+                <option value={5}>Last 6 Months</option>
+                <option value={11}>Last Year</option>
+              </select>
+              Show Others
               <input
                 type="checkbox"
-                onChange={() => onIncludeChange(0)}
+                defaultChecked
+                onChange={() => setShowOthers(!showOthers)}
               ></input>
-            ) : (
-              <></>
-            )}
-          </h3>
-          <div
-            style={{ width: "100%", height: "100%" }}
-            ref={(ref) =>
-              !printRef.current.includes(ref) && printRef.current.push(ref)
-            }
-          >
-            <PieChart
-              data={GetMedicalField(
-                allEntries ?? [],
-                minField,
-                showOthers,
-                dates ?? [],
-                periods[0] ?? 0
-              )}
-              scheme={primaryScheme}
-            />
-          </div>
-          <div className={styles.min}>
-            Min. Occurrences:{" "}
-            <input
-              className={styles.min_input}
-              value={minField}
-              name="minField"
-              type="number"
-              onChange={onInputChange}
-            />
+            </div>
+            <div className={styles.left_wrapper}>
+              <h3>
+                Customer Fields
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    onChange={() => onIncludeChange(0)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <PieChart
+                  data={GetMedicalField(
+                    allEntries ?? [],
+                    minField,
+                    showOthers,
+                    dates ?? [],
+                    periods[0] ?? 0
+                  )}
+                  scheme={primaryScheme}
+                />
+              </div>
+              <div className={styles.min}>
+                Min. Occurrences:{" "}
+                <input
+                  className={styles.min_input}
+                  value={minField}
+                  name="minField"
+                  type="number"
+                  onChange={onInputChange}
+                />
+              </div>
+            </div>
+            <div className={styles.middle_wrapper}>
+              <h3>
+                Lead Status in %
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    onChange={() => onIncludeChange(1)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <PieChart
+                  data={GetLeadStatus(
+                    allEntries ?? [],
+                    showOthers,
+                    dates ?? [],
+                    periods[0] ?? 0
+                  )}
+                  scheme={secondaryScheme}
+                />
+              </div>
+            </div>
+            <div className={styles.center_wrapper}>
+              <h3>
+                Lead Requests Over Time
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    onChange={() => onIncludeChange(2)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <LineChart
+                  data={GetLeadsOverTime(
+                    allEntries ?? [],
+                    dates ?? [],
+                    periods[0] ?? 0
+                  )}
+                  scheme={primaryScheme}
+                  axisBottom="Months"
+                  axisLeft="No. of leads"
+                />
+              </div>
+            </div>
           </div>
         </div>
-        <div className={styles.middle_wrapper}>
-          <h3>
-            Lead Status in %
-            {showExport ? (
-              <input
-                type="checkbox"
-                onChange={() => onIncludeChange(1)}
-              ></input>
-            ) : (
-              <></>
-            )}
-          </h3>
-          <div
-            style={{ width: "100%", height: "100%" }}
-            ref={(ref) =>
-              !printRef.current.includes(ref) && printRef.current.push(ref)
-            }
-          >
-            <PieChart data={GetLeadStatus(allEntries ?? [], showOthers, dates ?? [], periods[0] ?? 0)} scheme={secondaryScheme}/>
+        <div className="fixed top-0 h-[10vh] w-full bg-[#000020] shadow-[0_3px_20px_rgb(2,4,2)] ">
+          <div className="fixed w-full pt-4 text-center align-middle text-6xl text-white ">
+            CBH Predictor Tool
           </div>
+          <Navbar />
         </div>
-        <div className={styles.center_wrapper}>
-          <h3>
-            Lead Requests Over Time
-            {showExport ? (
-              <input
-                type="checkbox"
-                onChange={() => onIncludeChange(2)}
-              ></input>
-            ) : (
-              <></>
-            )}
-          </h3>
-          <div
-            style={{ width: "100%", height: "100%" }}
-            ref={(ref) =>
-              !printRef.current.includes(ref) && printRef.current.push(ref)
-            }
-          >
-            {/*<LineChart data={GetLeadsOverTime(dates, periods[0])} scheme={primaryScheme}/>*/}
-          </div>
-        </div>
-      </div>
-    </div>
+      </main>
+    </>
   );
 };
 

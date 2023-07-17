@@ -23,6 +23,7 @@ import { BarChart } from "~/components/charts/bar";
 import { type BarDatum } from "@nivo/bar";
 import PopoverButton from "~/components/charts/popover";
 import Navbar from "~/components/navbar";
+import Head from "next/head";
 
 const primaryScheme = [
   "#5fc431",
@@ -709,354 +710,6 @@ const BingChart = () => {
     setIncludeExport(initialExport);
   };
 
-  return (
-    <main className="h-[100vh] w-[100vw] font-poppins ">
-      <div className="overflow-y-auto overflow-x-hidden px-20 pt-[12vh]">
-        <button
-          onClick={() => void router.push("/")}
-          className="fixed left-4 w-12 rounded-2xl bg-[#000040] py-1 text-white"
-        >
-          <b>&#60;</b>
-        </button>
-        <div className="fixed left-4 top-48">
-          <button
-            onClick={() => {
-              setShowExport(false);
-              void handleDownloadPdf();
-            }}
-            className="fixed -left-[0.55rem] h-[50px] w-[100px] -rotate-90 rounded-r-2xl bg-[#6bb238]"
-          >
-            Export
-          </button>
-          <button
-            onClick={() => setShowExport(!showExport)}
-            className="relative top-16 flex w-[50px] justify-center rounded-b-2xl bg-[#599231] py-2"
-          >
-            <BiShow />
-          </button>
-        </div>
-        {/* First Block */}
-        <div className={styles.grid_container_3_items_small_mid}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
-            Period:
-            <select onChange={(e) => onPeriodChange(e, 0)} className="mr-2">
-              <option selected={true} value={0}>
-                Last Month
-              </option>
-              <option value={2}>Last 3 Months</option>
-              <option value={11}>Last Year</option>
-              <option value={-1}>All Time</option>
-            </select>
-            Show Others
-            <input
-              type="checkbox"
-              defaultChecked
-              onChange={() => setShowOthers(!showOthers)}
-            ></input>
-          </div>
-          <div className={styles.left_wrapper}>
-            <h3 className="h3">
-              Impressions
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[0]}
-                  onChange={() => onIncludeChange(0)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "100%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <PieChart
-                data={GetImpressions(
-                  allEntries ?? [],
-                  minImpr,
-                  showOthers,
-                  dates ?? [],
-                  periods[0] ?? 0
-                )}
-                scheme={primaryScheme}
-              />
-            </div>
-            <div className={styles.min}>
-              Min. Impressions:{" "}
-              <input
-                className={styles.min_input}
-                value={minImpr}
-                name="minImpr"
-                type="number"
-                onChange={onInputChange}
-              />{" "}
-            </div>
-          </div>
-          <div className={styles.middle_wrapper}>
-            <h3 className="h3">vs.</h3> <br />
-            <br />
-            <br />
-            <br />
-            <h4>Click-Through-Rate:</h4>
-            {GetClickThrough(allEntries ?? [], dates ?? [], periods[0] ?? 0)} %
-          </div>
-          <div className={styles.right_wrapper}>
-            <h3 className="h3">
-              Clicks
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[1]}
-                  onChange={() => onIncludeChange(1)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "100%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <PieChart
-                data={GetClicks(
-                  allEntries ?? [],
-                  minClicks,
-                  showOthers,
-                  dates ?? [],
-                  periods[0] ?? 0
-                )}
-                scheme={primaryScheme}
-              />
-            </div>
-            <div className={styles.min}>
-              Min. Clicks:{" "}
-              <input
-                className={styles.min_input}
-                value={minClicks}
-                name="minClicks"
-                type="number"
-                onChange={onInputChange}
-              />{" "}
-            </div>
-          </div>
-        </div>
-        {/* Second Block */}
-        <div className={styles.grid_container_2_items}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
-            Period:
-            <select onChange={(e) => onPeriodChange(e, 1)}>
-              <option value={2} selected={true}>
-                Last 3 Months
-              </option>
-              <option value={5}>Last 6 Months</option>
-              <option value={11}>Last Year</option>
-            </select>
-          </div>
-          <div className={styles.left_wrapper}>
-            <h3 className="h3">
-              Impressions & Clicks
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[2]}
-                  onChange={() => onIncludeChange(2)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "100%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <LineChart
-                data={GetClicksAndImpressionsOverTime(
-                  dates ?? [],
-                  periods[1] ?? 0,
-                  allEntries ?? []
-                )}
-                scheme={[
-                  primaryScheme[0] ?? "#000000",
-                  primaryScheme[8] ?? "#000000",
-                ]}
-                axisBottom={"time"}
-                axisLeft={""}
-              />
-            </div>
-          </div>
-          <div className={styles.middle_wrapper}>
-            <h3 className="h3">
-              Click-Through-Rate
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[3]}
-                  onChange={() => onIncludeChange(3)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "100%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <LineChart
-                data={GetClickThroughOverTime(
-                  dates ?? [],
-                  periods[1] ?? 0,
-                  allEntries ?? []
-                )}
-                scheme={[primaryScheme[10] ?? "#000000"]}
-                axisBottom={"time"}
-                axisLeft={"%"}
-              />
-            </div>
-          </div>
-        </div>
-        {/* Third Block */}
-        <div className={styles.grid_container_2_items_4_rows}>
-          <div className="flex flex-row justify-center items-center gap-2 col-span-3 h-12 bg-[#89d056] rounded-full">
-            Period:
-            <select onChange={(e) => onPeriodChange(e, 2)}>
-              <option value={2} selected={true}>
-                Last 3 Month
-              </option>
-              <option value={5}>Last 6 Months</option>
-              <option value={11}>Last Year</option>
-            </select>
-          </div>
-          <div className={styles.wrapper_2_wide_top}>
-            <h3 className="h3">
-              Ranking over Time
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[4]}
-                  onChange={() => onIncludeChange(4)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "100%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <AreaBump
-                data={GetCustomAreaBump(
-                  terms,
-                  dates ?? [],
-                  periods[2] ?? 0,
-                  allEntries ?? []
-                )}
-                scheme={tempScheme}
-              />
-            </div>
-          </div>
-          <div className={styles.wrapper_2_wide_mid}>
-            {terms.map((item, i) => (
-              <label className={styles.terms} key={i}>
-                {item}
-                <button
-                  onClick={() => {
-                    removeFromTerms(item);
-                  }}
-                >
-                  X
-                </button>
-              </label>
-            ))}
-            <PopoverButton terms={terms} addToTerms={addToTerms} />
-          </div>
-          <div className={styles.wrapper_left_bottom}>
-            <h3 className="h3">
-              Terms per Month
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[5]}
-                  onChange={() => onIncludeChange(5)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "85%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <BarChart
-                data={GetCustomBar(
-                  terms,
-                  dates ?? [],
-                  periods[2] ?? 0,
-                  allEntries ?? []
-                )}
-                scheme={tempScheme}
-                keys={terms}
-                index={"date"}
-                xAxis={"dates"}
-                yAxis={""}
-              />
-            </div>
-          </div>
-          <div className={styles.wrapper_right_bottom}>
-            <h3 className="h3">
-              Terms over Time
-              {showExport ? (
-                <input
-                  type="checkbox"
-                  checked={includeExport[6]}
-                  onChange={() => onIncludeChange(6)}
-                ></input>
-              ) : (
-                <></>
-              )}
-            </h3>
-            <div
-              style={{ width: "100%", height: "85%" }}
-              ref={(ref) =>
-                !printRef.current.includes(ref) && printRef.current.push(ref)
-              }
-            >
-              <LineChart
-                data={GetCustomLine(
-                  terms,
-                  dates ?? [],
-                  periods[2] ?? 0,
-                  allEntries ?? []
-                )}
-                scheme={tempScheme}
-                axisBottom="month"
-                axisLeft="impressions"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-      <div className="fixed top-0 h-[10vh] w-full bg-[#000020] shadow-[0_3px_20px_rgb(2,4,2)] ">
-        <div className="fixed w-full pt-4 text-center align-middle text-6xl text-white ">
-          CBH Predictor Tool
-        </div>
-        <Navbar />
-      </div>
-    </main>
-  );
-
   function addToTerms(term: string) {
     if (allEntries !== undefined) {
       if (!allEntries.find((e) => e.Term === term)) {
@@ -1070,6 +723,367 @@ const BingChart = () => {
   function removeFromTerms(item: string) {
     setTerms(terms.filter((a) => a !== item));
   }
+
+  return (
+    <>
+      <Head>
+        <title>CBH Predictor Tool</title>
+        <meta name="description" content="Generated by create-t3-app" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
+      <main className="h-[100vh] w-[100vw] font-poppins ">
+        <div className="overflow-y-auto overflow-x-hidden px-20 pt-[12vh]">
+          <button
+            onClick={() => void router.push("/")}
+            className="fixed left-4 w-12 rounded-2xl bg-[#000040] py-1 text-white"
+          >
+            <b>&#60;</b>
+          </button>
+          <div className="fixed left-4 top-48">
+            <button
+              onClick={() => {
+                setShowExport(false);
+                void handleDownloadPdf();
+              }}
+              className="fixed -left-[0.55rem] h-[50px] w-[100px] -rotate-90 rounded-r-2xl bg-[#6bb238]"
+            >
+              Export
+            </button>
+            <button
+              onClick={() => setShowExport(!showExport)}
+              className="relative top-16 flex w-[50px] justify-center rounded-b-2xl bg-[#599231] py-2"
+            >
+              <BiShow />
+            </button>
+          </div>
+          {/* First Block */}
+          <div className={styles.grid_container_3_items_small_mid}>
+            <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
+              Period:
+              <select onChange={(e) => onPeriodChange(e, 0)} className="mr-2">
+                <option selected={true} value={0}>
+                  Last Month
+                </option>
+                <option value={2}>Last 3 Months</option>
+                <option value={11}>Last Year</option>
+                <option value={-1}>All Time</option>
+              </select>
+              Show Others
+              <input
+                type="checkbox"
+                defaultChecked
+                onChange={() => setShowOthers(!showOthers)}
+              ></input>
+            </div>
+            <div className={styles.left_wrapper}>
+              <h3 className="h3">
+                Impressions
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[0]}
+                    onChange={() => onIncludeChange(0)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <PieChart
+                  data={GetImpressions(
+                    allEntries ?? [],
+                    minImpr,
+                    showOthers,
+                    dates ?? [],
+                    periods[0] ?? 0
+                  )}
+                  scheme={primaryScheme}
+                />
+              </div>
+              <div className={styles.min}>
+                Min. Impressions:{" "}
+                <input
+                  className={styles.min_input}
+                  value={minImpr}
+                  name="minImpr"
+                  type="number"
+                  onChange={onInputChange}
+                />{" "}
+              </div>
+            </div>
+            <div className={styles.middle_wrapper}>
+              <h3 className="h3">vs.</h3> <br />
+              <br />
+              <br />
+              <br />
+              <h4>Click-Through-Rate:</h4>
+              {GetClickThrough(
+                allEntries ?? [],
+                dates ?? [],
+                periods[0] ?? 0
+              )}{" "}
+              %
+            </div>
+            <div className={styles.right_wrapper}>
+              <h3 className="h3">
+                Clicks
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[1]}
+                    onChange={() => onIncludeChange(1)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <PieChart
+                  data={GetClicks(
+                    allEntries ?? [],
+                    minClicks,
+                    showOthers,
+                    dates ?? [],
+                    periods[0] ?? 0
+                  )}
+                  scheme={primaryScheme}
+                />
+              </div>
+              <div className={styles.min}>
+                Min. Clicks:{" "}
+                <input
+                  className={styles.min_input}
+                  value={minClicks}
+                  name="minClicks"
+                  type="number"
+                  onChange={onInputChange}
+                />{" "}
+              </div>
+            </div>
+          </div>
+          {/* Second Block */}
+          <div className={styles.grid_container_2_items}>
+            <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
+              Period:
+              <select onChange={(e) => onPeriodChange(e, 1)}>
+                <option value={2} selected={true}>
+                  Last 3 Months
+                </option>
+                <option value={5}>Last 6 Months</option>
+                <option value={11}>Last Year</option>
+              </select>
+            </div>
+            <div className={styles.left_wrapper}>
+              <h3 className="h3">
+                Impressions & Clicks
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[2]}
+                    onChange={() => onIncludeChange(2)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <LineChart
+                  data={GetClicksAndImpressionsOverTime(
+                    dates ?? [],
+                    periods[1] ?? 0,
+                    allEntries ?? []
+                  )}
+                  scheme={[
+                    primaryScheme[0] ?? "#000000",
+                    primaryScheme[8] ?? "#000000",
+                  ]}
+                  axisBottom={"time"}
+                  axisLeft={""}
+                />
+              </div>
+            </div>
+            <div className={styles.middle_wrapper}>
+              <h3 className="h3">
+                Click-Through-Rate
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[3]}
+                    onChange={() => onIncludeChange(3)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <LineChart
+                  data={GetClickThroughOverTime(
+                    dates ?? [],
+                    periods[1] ?? 0,
+                    allEntries ?? []
+                  )}
+                  scheme={[primaryScheme[10] ?? "#000000"]}
+                  axisBottom={"time"}
+                  axisLeft={"%"}
+                />
+              </div>
+            </div>
+          </div>
+          {/* Third Block */}
+          <div className={styles.grid_container_2_items_4_rows}>
+            <div className="col-span-3 flex h-12 flex-row items-center justify-center gap-2 rounded-full bg-[#89d056]">
+              Period:
+              <select onChange={(e) => onPeriodChange(e, 2)}>
+                <option value={2} selected={true}>
+                  Last 3 Month
+                </option>
+                <option value={5}>Last 6 Months</option>
+                <option value={11}>Last Year</option>
+              </select>
+            </div>
+            <div className={styles.wrapper_2_wide_top}>
+              <h3 className="h3">
+                Ranking over Time
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[4]}
+                    onChange={() => onIncludeChange(4)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "100%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <AreaBump
+                  data={GetCustomAreaBump(
+                    terms,
+                    dates ?? [],
+                    periods[2] ?? 0,
+                    allEntries ?? []
+                  )}
+                  scheme={tempScheme}
+                />
+              </div>
+            </div>
+            <div className={styles.wrapper_2_wide_mid}>
+              {terms.map((item, i) => (
+                <label className={styles.terms} key={i}>
+                  {item}
+                  <button
+                    onClick={() => {
+                      removeFromTerms(item);
+                    }}
+                  >
+                    X
+                  </button>
+                </label>
+              ))}
+              <PopoverButton terms={terms} addToTerms={addToTerms} />
+            </div>
+            <div className={styles.wrapper_left_bottom}>
+              <h3 className="h3">
+                Terms per Month
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[5]}
+                    onChange={() => onIncludeChange(5)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "85%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <BarChart
+                  data={GetCustomBar(
+                    terms,
+                    dates ?? [],
+                    periods[2] ?? 0,
+                    allEntries ?? []
+                  )}
+                  scheme={tempScheme}
+                  keys={terms}
+                  index={"date"}
+                  xAxis={"dates"}
+                  yAxis={""}
+                />
+              </div>
+            </div>
+            <div className={styles.wrapper_right_bottom}>
+              <h3 className="h3">
+                Terms over Time
+                {showExport ? (
+                  <input
+                    type="checkbox"
+                    checked={includeExport[6]}
+                    onChange={() => onIncludeChange(6)}
+                  ></input>
+                ) : (
+                  <></>
+                )}
+              </h3>
+              <div
+                style={{ width: "100%", height: "85%" }}
+                ref={(ref) =>
+                  !printRef.current.includes(ref) && printRef.current.push(ref)
+                }
+              >
+                <LineChart
+                  data={GetCustomLine(
+                    terms,
+                    dates ?? [],
+                    periods[2] ?? 0,
+                    allEntries ?? []
+                  )}
+                  scheme={tempScheme}
+                  axisBottom="month"
+                  axisLeft="impressions"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="fixed top-0 h-[10vh] w-full bg-[#000020] shadow-[0_3px_20px_rgb(2,4,2)] ">
+          <div className="fixed w-full pt-4 text-center align-middle text-6xl text-white ">
+            CBH Predictor Tool
+          </div>
+          <Navbar />
+        </div>
+      </main>
+    </>
+  );
 };
 
 export default BingChart;
