@@ -8,14 +8,28 @@ export const leadRouter = createTRPCRouter({
             return await ctx.prisma.lead.findMany()
         }),
 
+    getMany: publicProcedure
+        .input(z.object({ page: z.number(), lines: z.number() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.prisma.lead.findMany({
+                take: input.lines,
+                skip: input.lines * (input.page -1)
+            })
+        }),
+
     get: publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            return ctx.prisma.lead.findFirst({
+            return await ctx.prisma.lead.findFirst({
                 where: {
                     id: input
                 }
             })
+        }),
+
+    count: publicProcedure
+        .query(async ({ ctx }) => {
+            return (await ctx.prisma.bing.findMany()).length
         }),
 
     update: publicProcedure
@@ -45,12 +59,6 @@ export const leadRouter = createTRPCRouter({
                     id: input
                 }
             })
-        }),
-
-    count: publicProcedure
-        .query(async ({ ctx }) => {
-            const entries = await ctx.prisma.lead.findMany()
-            return entries.length
         }),
 
     dates: publicProcedure

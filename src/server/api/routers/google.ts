@@ -8,14 +8,28 @@ export const googleRouter = createTRPCRouter({
             return await ctx.prisma.google.findMany()
         }),
 
+    getMany: publicProcedure
+        .input(z.object({ page: z.number(), lines: z.number() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.prisma.google.findMany({
+                take: input.lines,
+                skip: input.lines * (input.page -1)
+            })
+        }),
+
     get: publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            return ctx.prisma.google.findFirst({
+            return await ctx.prisma.google.findFirst({
                 where: {
                     id: input
                 }
             })
+        }),
+
+    count: publicProcedure
+        .query(async ({ ctx }) => {
+            return (await ctx.prisma.bing.findMany()).length
         }),
 
     update: publicProcedure
@@ -45,12 +59,6 @@ export const googleRouter = createTRPCRouter({
                     id: input
                 }
             })
-        }),
-
-    count: publicProcedure
-        .query(async ({ ctx }) => {
-            const entries = await ctx.prisma.google.findMany()
-            return entries.length
         }),
 
     monthlyImpressions: publicProcedure

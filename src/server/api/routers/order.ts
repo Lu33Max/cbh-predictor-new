@@ -11,14 +11,28 @@ export const orderRouter = createTRPCRouter({
             return await ctx.prisma.order.findMany()
         }),
 
+    getMany: publicProcedure
+        .input(z.object({ page: z.number(), lines: z.number() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.prisma.order.findMany({
+                take: input.lines,
+                skip: input.lines * (input.page -1)
+            })
+        }),
+
     get: publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
-            return ctx.prisma.order.findFirst({
+            return await ctx.prisma.order.findFirst({
                 where: {
                     id: input
                 }
             })
+        }),
+
+    count: publicProcedure
+        .query(async ({ ctx }) => {
+            return (await ctx.prisma.bing.findMany()).length
         }),
 
     update: publicProcedure
@@ -48,12 +62,6 @@ export const orderRouter = createTRPCRouter({
                     id: input
                 }
             })
-        }),
-
-    count: publicProcedure
-        .query(async ({ ctx }) => {
-            const entries = await ctx.prisma.order.findMany()
-            return entries.length
         }),
 
     countDistinct: publicProcedure

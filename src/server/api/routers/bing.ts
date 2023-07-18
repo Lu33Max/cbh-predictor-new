@@ -8,6 +8,15 @@ export const bingRouter = createTRPCRouter({
             return await ctx.prisma.bing.findMany()
         }),
 
+    getMany: publicProcedure
+        .input(z.object({ page: z.number(), lines: z.number() }))
+        .query(async ({ ctx, input }) => {
+            return await ctx.prisma.bing.findMany({
+                take: input.lines,
+                skip: input.lines * (input.page -1)
+            })
+        }),
+
     get: publicProcedure
         .input(z.string())
         .query(async ({ ctx, input }) => {
@@ -16,6 +25,11 @@ export const bingRouter = createTRPCRouter({
                     id: input
                 }
             })
+        }),
+
+    count: publicProcedure
+        .query(async ({ ctx }) => {
+            return (await ctx.prisma.bing.findMany()).length
         }),
 
     update: publicProcedure
@@ -45,12 +59,6 @@ export const bingRouter = createTRPCRouter({
                     id: input
                 }
             })
-        }),
-
-    count: publicProcedure
-        .query(async ({ ctx }) => {
-            const entries = await ctx.prisma.bing.findMany()
-            return entries.length
         }),
 
     monthlyImpressions: publicProcedure
