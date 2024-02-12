@@ -64,11 +64,10 @@ const Pages: React.FC<{
     <div className="flex flex-row items-center">
       {/*selection of page*/}
       {range.map((el, index) => (
-        <>
+        <div key={3000 + index}>
           {el === 1 && (
             <>
               <button
-                key={index}
                 className={`mx-1 justify-center rounded-xl border-2 border-solid px-3 py-1 border-green-900 text-lg text-green-900 ${
                   page === index + 1
                     ? `bg-orange-300`
@@ -79,7 +78,7 @@ const Pages: React.FC<{
                 {el}
               </button>
               {(page - 3 > 1) && (
-                  <label key={1000} className="whitespace-nowrap">
+                  <label className="whitespace-nowrap">
                     &nbsp;. . .&nbsp;
                   </label>
                 )}
@@ -87,7 +86,6 @@ const Pages: React.FC<{
           )}
           {(el >= page - 2 && el <= page + 2 && el !== 1 && el !== range.length) && (
               <button
-                key={1000 + index}
                 className={`mx-1 justify-center rounded-xl border-2 border-solid px-3 py-1 border-green-900 text-lg text-green-900 ${
                   page === index + 1
                     ? `bg-orange-300`
@@ -101,12 +99,11 @@ const Pages: React.FC<{
           {el === range.length && range.length !== 1 && (
             <>
               {(page + 3 < range.length) && (
-                  <label key={range.length + 1} className="whitespace-nowrap">
+                  <label className="whitespace-nowrap">
                     &nbsp;. . .&nbsp;
                   </label>
                 )}
               <button
-                key={1000 + index}
                 className={`mx-1 justify-center rounded-xl border-2 border-solid px-3 py-1 border-green-900 text-lg text-green-900 ${
                   page === index + 1
                     ? `bg-orange-300`
@@ -118,7 +115,7 @@ const Pages: React.FC<{
               </button>
             </>
           )}
-        </>
+        </div>
       ))}
     </div>
   );

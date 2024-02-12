@@ -51,6 +51,8 @@ const primaryScheme = [
 //const contrastScheme = ['#12ec66 ','#00d68f ','#00bcb4 ','#00a0d0 ','#0083dc ','#0064d4 ','#0056c2 ','#0047bc ','#0042b7 ','#0035aa ','#0023a1 ','#001589']
 const tempScheme = ["#5fc431", "#96e890", "#82cc96", "#62b37f", "#188255"];
 
+type ImprClicks = "Impressions" | "Clicks"
+
 //// MAPPING FUNCTIONS ////
 function GetImpressions(
   entries: Google[],
@@ -351,7 +353,8 @@ function GetCustomAreaBump(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Google[]
+  allEntries: Google[],
+  type: ImprClicks
 ) {
   const [data, setData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -397,7 +400,7 @@ function GetCustomAreaBump(
             if (termAtDate !== undefined) {
               newDatum.data.push({
                 x: currentDate,
-                y: termAtDate.Impressions,
+                y: termAtDate[type],
               });
             } else {
               newDatum.data.push({
@@ -414,7 +417,7 @@ function GetCustomAreaBump(
     }
     setData(newEntries);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries]);
+  }, [entries, type]);
 
   return data;
 }
@@ -423,7 +426,8 @@ function GetCustomBar(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Google[]
+  allEntries: Google[],
+  type: ImprClicks
 ): BarDatum[] {
   const [barData, setBarData] = useState<BarDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -461,7 +465,7 @@ function GetCustomBar(
 
           if (entry !== undefined) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-            (newBarData[i] as BarDatum)[term] = entry.Impressions;
+            (newBarData[i] as BarDatum)[term] = entry[type];
           } else {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             (newBarData[i] as BarDatum)[term] = 0;
@@ -473,7 +477,7 @@ function GetCustomBar(
     newBarData.reverse();
     setBarData(newBarData);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries]);
+  }, [entries, type]);
 
   return barData;
 }
@@ -482,7 +486,8 @@ function GetCustomLine(
   terms: string[],
   dates: string[],
   period: number,
-  allEntries: Google[]
+  allEntries: Google[],
+  type: ImprClicks
 ) {
   const [lineData, setLineData] = useState<ILineDatum[]>([]);
   const [entries, setEntries] = useState(allEntries);
@@ -523,7 +528,7 @@ function GetCustomLine(
             if (entry !== undefined)
               newEntries[i]?.data.push({
                 x: currentDate,
-                y: entry.Impressions,
+                y: entry[type],
               });
             else newEntries[i]?.data.push({ x: currentDate, y: 0 });
           }
@@ -535,7 +540,7 @@ function GetCustomLine(
 
     setLineData(newEntries);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entries]);
+  }, [entries, type]);
 
   return lineData;
 }
@@ -546,21 +551,22 @@ const GoogleChart = () => {
 
   const initialExport = [false, false, false, false, false, false, false];
   const [showExport, setShowExport] = useState(false);
-  const [includeExport, setIncludeExport] = useState(initialExport);
 
-  const [minImpr, setMinImpr] = useState(100);
+  const [minImpr, setMinImpr] = useState(50);
   const [minClicks, setMinClicks] = useState(5);
   const [periods, setPeriods] = useState([0, 2, 2]);
   const [showOthers, setShowOthers] = useState(true);
+  const [type, setType] = useState<ImprClicks>("Impressions")
 
   const { data: allEntries } = api.google.getAll.useQuery();
   const { data: dates } = api.google.dates.useQuery();
 
   const [terms, setTerms] = useState([
+    "ffpe",
     "biobank",
-    "biorepository",
-    "ffpe tissue",
+    "ffpe tissue"
   ]);
+  const [includeExport, setIncludeExport] = useState(initialExport);
 
   const headers = [
     "Impressions",
@@ -709,7 +715,7 @@ const GoogleChart = () => {
     pdf.save("Searchterms_B.pdf");
     setIncludeExport(initialExport);
   };
-  
+
   function addToTerms(term: string) {
     if (allEntries !== undefined) {
       if (!allEntries.find((e) => e.Term === term)) {
@@ -722,6 +728,19 @@ const GoogleChart = () => {
 
   function removeFromTerms(item: string) {
     setTerms(terms.filter((a) => a !== item));
+  }
+
+  function switchType(e: React.ChangeEvent<HTMLSelectElement>){
+    switch(e.target.value){
+      case "Impressions":
+        setType("Impressions")
+        break;
+      case "Clicks":
+        setType("Clicks")
+        break;
+      default:
+        break;
+    }
   }
 
   return (
@@ -961,6 +980,10 @@ const GoogleChart = () => {
                 <option value={5}>Last 6 Months</option>
                 <option value={11}>Last Year</option>
               </select>
+              <select onChange={(e) => switchType(e)}>
+                <option value="Clicks">Clicks</option>
+                <option value="Impressions" selected={true}>Impressions</option>
+              </select>
             </div>
             <div className={styles.wrapper_2_wide_top}>
               <h3 className="h3">
@@ -986,7 +1009,8 @@ const GoogleChart = () => {
                     terms,
                     dates ?? [],
                     periods[2] ?? 0,
-                    allEntries ?? []
+                    allEntries ?? [],
+                    type
                   )}
                   scheme={tempScheme}
                 />
@@ -1031,7 +1055,8 @@ const GoogleChart = () => {
                     terms,
                     dates ?? [],
                     periods[2] ?? 0,
-                    allEntries ?? []
+                    allEntries ?? [],
+                    type
                   )}
                   scheme={tempScheme}
                   keys={terms}
@@ -1065,7 +1090,8 @@ const GoogleChart = () => {
                     terms,
                     dates ?? [],
                     periods[2] ?? 0,
-                    allEntries ?? []
+                    allEntries ?? [],
+                    type
                   )}
                   scheme={tempScheme}
                   axisBottom="month"
