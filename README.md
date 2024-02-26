@@ -1,28 +1,39 @@
-# Create T3 App
+# Documentation
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+## Installation
 
-## What's next? How do I make an app with this?
+1. Clone the Git repository: Open your command-line interface (e.g., Terminal) and navigate to the directory where you want to download the project. Then, run the following command to clone the repository:
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+```
+git clone <repository-url>
+```
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+2. Navigate to the project directory: Once the repository is cloned, navigate to the project directory using the following command:
 
-## Learn More
+```
+cd <project-directory>
+```
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+3. Install Node.js: Ensure that you have Node.js installed on your machine. If you haven't installed it already, follow these steps:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+    1. Visit the official Node.js website [https://nodejs.org](https://nodejs.org) in your web browser.
+    2. Download the appropriate version of Node.js for your operating system (e.g., Windows, macOS, Linux).
+    3. Run the installer and follow the on-screen instructions to complete the installation.
 
-## How do I deploy this?
+4. Install project dependencies: Run the following command to install the project dependencies specified in the `package.json` file:
+```
+npm install
+```
+This command will download and install all the required libraries and dependencies mentioned in the `package.json` file.
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+5. Configure environment variables: If your project requires any environment variables (such as API keys or database credentials), make sure to set them up in the `.env` file.
+
+6. Start the project: Once the dependencies are installed, start the project using the appropriate command.
+
+```
+npm run dev
+```
+
+8. Access the project: After starting the project, open your web browser and navigate to the URL provided by the project, which is [http://localhost:3000].
